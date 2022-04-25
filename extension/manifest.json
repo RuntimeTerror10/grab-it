@@ -1,0 +1,23 @@
+{
+  "name": "Grab It",
+  "description": "Grab from Anywhere",
+  "version": "0.1.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.google.com/*",
+    "<all_urls>"
+  ]
+}
