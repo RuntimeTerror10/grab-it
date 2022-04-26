@@ -1,11 +1,11 @@
-function passItem() {
+function passElement() {
   chrome.runtime.sendMessage({ greeting: "hello" }, function (response) {
     console.log(response.farewell);
   });
 }
 
-function generateCSSPath(item) {
-  const newPath = item.path.reverse();
+function generateCSSPath(ele) {
+  const newPath = ele.path.reverse();
   console.log(newPath);
   let cssPath = "";
   for (let i = 0; i < newPath.length; i++) {
@@ -26,5 +26,5 @@ document.body.addEventListener("click", (e) => {
   console.log(clickedElement);
   const path = generateCSSPath(clickedElement);
   console.log(path);
-  passItem();
+  passElement();
 });
