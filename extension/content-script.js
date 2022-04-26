@@ -1,10 +1,17 @@
-// function passItem() {
-//   chrome.runtime.sendMessage({ greeting: "hello" }, function (response) {
-//     console.log(response.farewell);
-//   });
-// }
+function handleResponse(message) {
+  console.log(`background script sent a response: ${message.response}`);
+}
 
-// #js-pjax-container > div.container-xl.px-3.px-md-4.px-lg-5 > div > div.Layout-sidebar > div > div.js-profile-editable-replace > div.d-flex.flex-column > div.js-profile-editable-area.d-flex.flex-column.d-md-block > div.flex-order-1.flex-md-order-none.mt-2.mt-md-0 > div > a:nth-child(1) > span
+function handleError(error) {
+  console.log(`Error: ${error}`);
+}
+
+function passItem() {
+  const sending = chrome.runtime.sendMessage({
+    content: "message from the content script",
+  });
+  sending.then(handleResponse, handleError);
+}
 
 function generateCSSPath(item) {
   const newPath = item.path.reverse();
@@ -28,7 +35,8 @@ document.body.addEventListener("click", (e) => {
   e.preventDefault();
   const clickedElement = e;
   console.log(clickedElement);
-  // passItem();
   const path = generateCSSPath(clickedElement);
   console.log(path);
+  passItem();
+  e.preventDefault();
 });

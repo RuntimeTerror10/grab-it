@@ -4,6 +4,11 @@ const grabBtn = document.querySelector(".grab-btn");
 //   const a = message.item;
 //   console.log(a);
 // }
+function handleMessage(request, sender, sendResponse) {
+  console.log(`content script sent a message: ${request.content}`);
+  sendResponse({ response: "response from background script" });
+}
+
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   const tab = tabs[0];
   const currentUrl = tab.url;
@@ -14,17 +19,6 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       target: { tabId: tab.id },
       files: ["content-script.js"],
     });
+    chrome.runtime.onMessage.addListener(handleMessage);
   });
 });
-
-// chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-//   console.log(
-//     sender.tab
-//       ? "from a content script:" + sender.tab.url
-//       : "from the extension"
-//   );
-//   if (request.greeting == "hello") {
-//     sendResponse({ farewell: "goodbye" });
-//     return true;
-//   }
-// });
