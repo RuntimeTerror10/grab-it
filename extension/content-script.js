@@ -38,5 +38,4 @@ document.body.addEventListener("click", (e) => {
   const path = generateCSSPath(clickedElement);
   console.log(path);
   passItem();
-  e.preventDefault();
 });
