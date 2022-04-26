@@ -1,16 +1,7 @@
-function handleResponse(message) {
-  console.log(`background script sent a response: ${message.response}`);
-}
-
-function handleError(error) {
-  console.log(`Error: ${error}`);
-}
-
 function passItem() {
-  const sending = chrome.runtime.sendMessage({
-    content: "message from the content script",
+  chrome.runtime.sendMessage({ greeting: "hello" }, function (response) {
+    console.log(response.farewell);
   });
-  sending.then(handleResponse, handleError);
 }
 
 function generateCSSPath(item) {
@@ -18,9 +9,7 @@ function generateCSSPath(item) {
   console.log(newPath);
   let cssPath = "";
   for (let i = 0; i < newPath.length; i++) {
-    if (newPath[i].localName === undefined) {
-      console.log(newPath[i]);
-    } else {
+    if (newPath[i].localName !== undefined) {
       if (i === newPath.length - 1) {
         cssPath += `${newPath[i].localName}`;
       } else {

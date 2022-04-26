@@ -1,12 +1,7 @@
 const grabBtn = document.querySelector(".grab-btn");
 
-// function receiveItem(message) {
-//   const a = message.item;
-//   console.log(a);
-// }
 function handleMessage(request, sender, sendResponse) {
   console.log(`content script sent a message: ${request.content}`);
-  sendResponse({ response: "response from background script" });
 }
 
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
