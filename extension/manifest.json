@@ -14,10 +14,17 @@
     "activeTab",
     "scripting",
     "tabs",
-    "scripting"
+    "scripting",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://www.google.com/*",
     "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["content-script.js"]
+    }
   ]
 }
