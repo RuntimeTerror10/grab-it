@@ -6,15 +6,15 @@ chrome.runtime.onInstalled.addListener(function () {
   });
 });
 
-//send message to content script
+//inject content script on tab change
+chrome.tabs.onActivated.addListener(function (activeInfo) {
+  chrome.tabs.get(activeInfo.tabId, function (tab) {
+    chrome.tabs.executeScript(tab.id, {
+      file: "content-script.js",
+    });
+  });
+});
+
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
   chrome.tabs.sendMessage(tab.id, { message: "grab item" });
 });
-
-// chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-//   if (request.message === "get url") {
-//     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-//       sendResponse({ url: tabs[0].url });
-//     });
-//   }
-// });

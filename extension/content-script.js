@@ -1,12 +1,7 @@
-// function passElement() {
-//   chrome.runtime.sendMessage({ content: "hello" });
-//   console.log("passed element");
-// }
 console.log("loaded");
 
 const generateCSSPath = (ele) => {
   const newPath = ele.path.reverse();
-  console.log(newPath);
   let cssPath = "";
   for (let i = 0; i < newPath.length; i++) {
     if (newPath[i].localName !== undefined) {
@@ -46,6 +41,8 @@ const generateObject = (element, event) => {
 };
 
 const createButtonGroup = (element, event) => {
+  element.style.border = "2px solid blue";
+
   const buttonGroupContainer = document.createElement("div");
   const cancelButton = document.createElement("button");
   const grabButton = document.createElement("button");
@@ -61,13 +58,13 @@ const createButtonGroup = (element, event) => {
 
   cancelButton.addEventListener("click", () => {
     element.style.border = "";
-    buttonGroupContainer.remove();
+    buttonGroupContainer.style.display = "none";
   });
 
   grabButton.addEventListener("click", () => {
     generateObject(element, event);
     element.style.border = "";
-    buttonGroupContainer.remove();
+    buttonGroupContainer.style.display = "none";
   });
 
   return buttonGroupContainer;
@@ -79,17 +76,8 @@ document.body.addEventListener("contextmenu", (e) => {
   console.log(ele);
   chrome.runtime.onMessage.addListener(function (request) {
     if (request.message === "grab item") {
-      ele.style.border = "2px solid blue";
       const buttonGroup = createButtonGroup(ele, menuEvent);
       ele.parentNode.insertBefore(buttonGroup, ele.nextSibling);
     }
   });
-
-  //   console.log(ele);
-  //   //   console.log(e);
-  //   //   // const clickedElement = e;
-  //   //   // console.log(clickedElement);
-  //   //   // const path = generateCSSPath(clickedElement);
-  //   //   // console.log(path);
-  //   //   // passElement();
 });
