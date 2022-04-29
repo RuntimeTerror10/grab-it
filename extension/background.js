@@ -8,13 +8,14 @@ chrome.runtime.onInstalled.addListener(function () {
 
 //inject content script on tab change
 chrome.tabs.onActivated.addListener(function (activeInfo) {
-  chrome.tabs.get(activeInfo.tabId, function (tab) {
-    chrome.tabs.executeScript(tab.id, {
-      file: "content-script.js",
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.scripting.executeScript({
+      target: { tabId: tabs[0].id },
+      files: ["content-script.js"],
     });
   });
 });
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
-  chrome.tabs.sendMessage(tab.id, { message: "grab item" });
+  chrome.tabs.sendMessage(tab.id, { message: "grab element" });
 });

@@ -1,18 +1,16 @@
 console.log("loaded");
+let eventObject = {};
 
-const generateCSSPath = (ele) => {
-  const newPath = ele.path.reverse();
-  let cssPath = "";
-  for (let i = 0; i < newPath.length; i++) {
-    if (newPath[i].localName !== undefined) {
-      if (i === newPath.length - 1) {
-        cssPath += `${newPath[i].localName}`;
-      } else {
-        cssPath += `${newPath[i].localName} > `;
-      }
-    }
+const generateCSSPath = (el) => {
+  let path = [],
+    parent;
+  while ((parent = el.parentNode)) {
+    path.unshift(
+      `${el.tagName}:nth-child(${[].indexOf.call(parent.children, el) + 1})`
+    );
+    el = parent;
   }
-  return cssPath;
+  return `${path.join(" > ")}`.toLowerCase();
 };
 
 const copyStringToClipboard = (str) => {
@@ -28,7 +26,8 @@ const copyStringToClipboard = (str) => {
 
 const generateObject = (element, event) => {
   const currentUrl = window.location.href;
-  const cssPath = generateCSSPath(event);
+  const cssPath = generateCSSPath(element);
+  console.log(cssPath);
   const elementData = element.innerText;
   const elementObject = {
     url: currentUrl,
@@ -40,8 +39,8 @@ const generateObject = (element, event) => {
   console.log(elementString);
 };
 
-const createButtonGroup = (element, event) => {
-  element.style.border = "2px solid blue";
+const createButtonGroup = (event) => {
+  event.target.style.border = "2px solid blue";
 
   const buttonGroupContainer = document.createElement("div");
   const cancelButton = document.createElement("button");
@@ -56,28 +55,30 @@ const createButtonGroup = (element, event) => {
   buttonGroupContainer.appendChild(grabButton);
   buttonGroupContainer.appendChild(selectParentButton);
 
+  event.target.parentNode.insertBefore(
+    buttonGroupContainer,
+    event.target.nextSibling
+  );
+
   cancelButton.addEventListener("click", () => {
-    element.style.border = "";
-    buttonGroupContainer.style.display = "none";
+    event.target.style.border = "";
+    buttonGroupContainer.remove();
   });
 
   grabButton.addEventListener("click", () => {
-    generateObject(element, event);
-    element.style.border = "";
-    buttonGroupContainer.style.display = "none";
+    generateObject(event.target, event);
+    event.target.style.border = "";
+    buttonGroupContainer.remove();
   });
-
-  return buttonGroupContainer;
 };
 
+chrome.runtime.onMessage.addListener(function (request) {
+  if (request.message === "grab element") {
+    createButtonGroup(eventObject);
+  }
+});
+
 document.body.addEventListener("contextmenu", (e) => {
-  const menuEvent = e;
-  const ele = menuEvent.target;
-  console.log(ele);
-  chrome.runtime.onMessage.addListener(function (request) {
-    if (request.message === "grab item") {
-      const buttonGroup = createButtonGroup(ele, menuEvent);
-      ele.parentNode.insertBefore(buttonGroup, ele.nextSibling);
-    }
-  });
+  eventObject = e;
+  console.log(e);
 });
