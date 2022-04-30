@@ -17,7 +17,7 @@ export default function Home() {
 
   return (
     <div>
-      <Header />
+      <Header session={session} />
       <div className="container" style={{ padding: "50px 0 100px 0" }}>
         {!session ? (
           <Auth />
