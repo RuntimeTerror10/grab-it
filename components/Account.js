@@ -81,7 +81,7 @@ export const Account = ({ session }) => {
       mode: "no-cors",
     };
     fetch(
-      "https://us-central1-grab-app-cloud.cloudfunctions.net/helloWorld",
+      "https://us-central1-grab-app-production.cloudfunctions.net/helloWorld",
       options
     ).then((response) => console.log(response));
   };
