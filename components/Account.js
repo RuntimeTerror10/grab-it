@@ -12,7 +12,7 @@ export const Account = ({ session }) => {
     getProfile();
   }, [session]);
 
-  async function getProfile() {
+  const getProfile = async () => {
     try {
       setLoading(true);
       const user = supabase.auth.user();
@@ -36,9 +36,9 @@ export const Account = ({ session }) => {
       setLoading(false);
       // }
     }
-  }
+  };
 
-  async function updateProfile(newData) {
+  const updateProfile = async (newData) => {
     try {
       setLoading(true);
       const user = supabase.auth.user();
@@ -61,7 +61,7 @@ export const Account = ({ session }) => {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const handleFormOpen = () => {
     setIsFormOpen(true);
@@ -73,10 +73,55 @@ export const Account = ({ session }) => {
     await updateProfile(newAddedItem);
     getProfile();
   };
-  console.log(elements);
+
+  const invokeCloudFunction = async (data) => {
+    const options = {
+      method: "POST",
+      body: JSON.stringify(data),
+      mode: "no-cors",
+    };
+    fetch(
+      "https://us-central1-grab-app-cloud.cloudfunctions.net/helloWorld",
+      options
+    ).then((response) => console.log(response));
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      const user = supabase.auth.user();
+      let { data, error, status } = await supabase
+        .from("grab_db")
+        .select(`id,elements`)
+        .eq("id", user.id)
+        .single();
+
+      if (data) {
+        const tempObj = {
+          id: data.id,
+          elements: data.elements,
+        };
+        console.log("tempObj", tempObj);
+        await invokeCloudFunction(tempObj);
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-screen">
       <div className="w-full flex justify-end ">
+        {elements.length > 0 && (
+          <button
+            onClick={handleRefresh}
+            className="bg-slate-800 text-slate-100 p-3 rounded mr-3"
+          >
+            Refresh
+          </button>
+        )}
         <button
           onClick={handleFormOpen}
           className="bg-slate-800 text-slate-100 p-3 rounded mr-3"
