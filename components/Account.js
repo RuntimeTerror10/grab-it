@@ -83,7 +83,11 @@ export const Account = ({ session }) => {
     fetch(
       "https://us-central1-grab-app-production.cloudfunctions.net/helloWorld",
       options
-    ).then((response) => console.log(response));
+    ).then((res) => {
+      console.log(res);
+
+      getProfile();
+    });
   };
 
   const handleRefresh = async () => {
@@ -103,11 +107,10 @@ export const Account = ({ session }) => {
         };
         console.log("tempObj", tempObj);
         await invokeCloudFunction(tempObj);
+        //set loading false after cloud function is invoked
       }
     } catch (error) {
       alert(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
