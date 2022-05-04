@@ -4,6 +4,7 @@ import { AddElementForm } from "./AddElementForm";
 import { ElementCard } from "./ElementCard";
 
 export const Account = ({ session }) => {
+  const [userID, setUserID] = useState("");
   const [elements, setElements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -14,12 +15,11 @@ export const Account = ({ session }) => {
 
   const getProfile = async () => {
     try {
-      setLoading(true);
       const user = supabase.auth.user();
 
       let { data, error, status } = await supabase
         .from("grab_db")
-        .select(`elements,updated_at`)
+        .select(`id,elements`)
         .eq("id", user.id)
         .single();
 
@@ -28,19 +28,18 @@ export const Account = ({ session }) => {
       }
 
       if (data) {
+        setUserID(data.id);
         setElements(data.elements);
       }
     } catch (error) {
       alert(error.message);
     } finally {
-      setLoading(false);
       // }
     }
   };
 
   const updateProfile = async (newData) => {
     try {
-      setLoading(true);
       const user = supabase.auth.user();
 
       const updates = {
@@ -59,7 +58,6 @@ export const Account = ({ session }) => {
     } catch (error) {
       alert(error.message);
     } finally {
-      setLoading(false);
     }
   };
 
@@ -69,48 +67,58 @@ export const Account = ({ session }) => {
 
   const handleFormClose = async (newAddedItem) => {
     setIsFormOpen(false);
-    setLoading(true);
+    newAddedItem.elementID = elements.length;
     await updateProfile(newAddedItem);
     getProfile();
+  };
+
+  const updateOnDashboard = (data) => {
+    let temp = elements;
+    temp.forEach((ele) => {
+      if (ele.elementID === data.eID) {
+        ele.data = data.newValue;
+      }
+    });
+    setElements((prevState) => [...temp]);
   };
 
   const invokeCloudFunction = async (data) => {
     const options = {
       method: "POST",
       body: JSON.stringify(data),
-      mode: "no-cors",
     };
     fetch(
-      "https://us-central1-grab-app-production.cloudfunctions.net/helloWorld",
+      "http://localhost:5000/grab-app-production/us-central1/helloWorld",
       options
-    ).then((res) => {
-      console.log(res);
-
-      getProfile();
-    });
+    )
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        updateOnDashboard(data);
+      });
   };
 
-  const handleRefresh = async () => {
-    try {
-      setLoading(true);
-      const user = supabase.auth.user();
-      let { data, error, status } = await supabase
-        .from("grab_db")
-        .select(`id,elements`)
-        .eq("id", user.id)
-        .single();
+  const handleRefresh = () => {
+    let temp = elements;
+    temp.forEach((element) => {
+      element.data = "loading";
+    });
+    let update_time = new Date().toISOString().toLocaleString("en-US");
+    setElements((prev) => [...temp]);
 
-      if (data) {
-        const tempObj = {
-          id: data.id,
-          elements: data.elements,
-        };
-        console.log("tempObj", tempObj);
-        await invokeCloudFunction(tempObj);
-        //set loading false after cloud function is invoked
-      }
-    } catch (error) {
-      alert(error.message);
+    for (let i = 0; i < temp.length; i++) {
+      let tempObj = {
+        id: userID,
+        element: temp[i],
+        allElements: temp,
+        updated_at: update_time,
+      };
+      invokeCloudFunction(tempObj);
+      //   // let temp = elements;
+      //   // temp[i].data = data;
+      //   // setElements(temp);
+      // }
     }
   };
 
@@ -135,21 +143,13 @@ export const Account = ({ session }) => {
       {isFormOpen ? <AddElementForm closeForm={handleFormClose} /> : null}
 
       <div className="w-full">
-        {loading ? (
-          <div>loading...</div>
-        ) : (
-          <div>
-            {elements.length ? (
-              <div className="w-full flex justify-evenly">
-                {elements.map((element, index) => (
-                  <ElementCard key={index} element={element} />
-                ))}
-              </div>
-            ) : (
-              <div>No Elements Grabbed yet!</div>
-            )}
+        <div>
+          <div className="w-full flex justify-evenly mt-3">
+            {elements.map((element, index) => (
+              <ElementCard element={element} key={index} />
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
