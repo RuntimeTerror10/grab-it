@@ -6,77 +6,82 @@ import { ElementCard } from "./ElementCard";
 export const Account = ({ session }) => {
   const [userID, setUserID] = useState("");
   const [elements, setElements] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
-    getProfile();
+    const user = supabase.auth.user();
+    setUserID(user.id);
+    getElements(user);
   }, [session]);
 
-  const getProfile = async () => {
+  const getElements = async (user) => {
     try {
-      const user = supabase.auth.user();
-
       let { data, error, status } = await supabase
         .from("grab_db")
-        .select(`id,elements`)
-        .eq("id", user.id)
-        .single();
-
+        .select("id,element")
+        .eq("userID", user.id);
       if (error && status !== 406) {
         throw error;
       }
-
       if (data) {
-        setUserID(data.id);
-        setElements(data.elements);
+        setElements(data);
       }
     } catch (error) {
-      alert(error.message);
-    } finally {
-      // }
+      console.log(error);
     }
   };
 
-  const updateProfile = async (newData) => {
+  const addElementInDB = async (newElement) => {
     try {
-      const user = supabase.auth.user();
-
-      const updates = {
-        id: user.id,
-        elements: [...elements, newData],
+      const { data, error } = await supabase.from("grab_db").insert({
+        userID: userID,
+        element: newElement,
         updated_at: new Date().toISOString().toLocaleString("en-US"),
-      };
-
-      let { error } = await supabase.from("grab_db").upsert(updates, {
-        returning: "minimal", // Don't return the value after inserting
       });
-
-      if (error) {
-        throw error;
-      }
     } catch (error) {
-      alert(error.message);
-    } finally {
+      console.log(error);
     }
   };
+
+  // const updateProfile = async (newData) => {
+  //   try {
+  //     const user = supabase.auth.user();
+
+  //     const updates = {
+  //       id: user.id,
+  //       element: newData,
+  //       updated_at: new Date().toISOString().toLocaleString("en-US"),
+  //     };
+
+  //     let { error } = await supabase.from("grab_db").upsert(updates, {
+  //       returning: "minimal", // Don't return the value after inserting
+  //     });
+
+  //     if (error) {
+  //       throw error;
+  //     }
+  //   } catch (error) {
+  //     alert(error.message);
+  //   } finally {
+  //   }
+  // };
 
   const handleFormOpen = () => {
     setIsFormOpen(true);
   };
 
-  const handleFormClose = async (newAddedItem) => {
+  const handleFormClose = async (newAddedElement) => {
     setIsFormOpen(false);
-    newAddedItem.elementID = elements.length;
-    await updateProfile(newAddedItem);
-    getProfile();
+    await addElementInDB(newAddedElement);
+    getElements(supabase.auth.user());
   };
 
   const updateOnDashboard = (data) => {
     let temp = elements;
     temp.forEach((ele) => {
-      if (ele.elementID === data.eID) {
-        ele.data = data.newValue;
+      if (ele.id === data.elementID) {
+        ele.element.data = data.newValue;
       }
     });
     setElements((prevState) => [...temp]);
@@ -102,24 +107,28 @@ export const Account = ({ session }) => {
   const handleRefresh = () => {
     let temp = elements;
     temp.forEach((element) => {
-      element.data = "loading";
+      element.element.data = "loading";
     });
     let update_time = new Date().toISOString().toLocaleString("en-US");
     setElements((prev) => [...temp]);
 
-    for (let i = 0; i < temp.length; i++) {
-      let tempObj = {
-        id: userID,
-        element: temp[i],
-        allElements: temp,
-        updated_at: update_time,
-      };
-      invokeCloudFunction(tempObj);
-      //   // let temp = elements;
-      //   // temp[i].data = data;
-      //   // setElements(temp);
-      // }
+    for (let i = 0; i < elements.length; i++) {
+      invokeCloudFunction(elements[i]);
+      console.log(elements[i]);
     }
+    // for (let i = 0; i < temp.length; i++) {
+    //   let tempObj = {
+    //     id: userID,
+    //     element: temp[i],
+    //     allElements: temp,
+    //     updated_at: update_time,
+    //   };
+    //   invokeCloudFunction(tempObj);
+    //   //   // let temp = elements;
+    //   //   // temp[i].data = data;
+    //   //   // setElements(temp);
+    //   // }
+    // }
   };
 
   return (
@@ -145,9 +154,13 @@ export const Account = ({ session }) => {
       <div className="w-full">
         <div>
           <div className="w-full flex justify-evenly mt-3">
-            {elements.map((element, index) => (
-              <ElementCard element={element} key={index} />
-            ))}
+            {elements.length ? (
+              elements.map((element, index) => (
+                <ElementCard element={element} key={index} />
+              ))
+            ) : (
+              <div>No elements grabbed yet</div>
+            )}
           </div>
         </div>
       </div>

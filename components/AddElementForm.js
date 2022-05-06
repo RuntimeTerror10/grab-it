@@ -2,12 +2,12 @@ import { useState } from "react";
 
 export const AddElementForm = (props) => {
   const [grabbedElement, setGrabbedElement] = useState("");
-  const [itemLabel, setItemLabel] = useState("");
+  const [elementLabel, setElementLabel] = useState("");
 
-  const handleAddItem = (e) => {
+  const handleAddElement = (e) => {
     e.preventDefault();
     let elementJSON = JSON.parse(grabbedElement);
-    elementJSON.label = itemLabel;
+    elementJSON.label = elementLabel;
     props.closeForm(elementJSON);
   };
 
@@ -15,7 +15,7 @@ export const AddElementForm = (props) => {
     <>
       <form
         className="w-screen bg-slate-800 flex justify-evenly py-10 mt-3"
-        onSubmit={handleAddItem}
+        onSubmit={handleAddElement}
       >
         <div>
           <label htmlFor="grabbed_element" className="text-slate-100 mr-1">
@@ -43,8 +43,8 @@ export const AddElementForm = (props) => {
             placeholder="add label (ex: my follower count)"
             className="bg-slate-100 border-solid border-2 border-slate-100 p-2"
             style={{ minWidth: "250px" }}
-            value={itemLabel}
-            onChange={(e) => setItemLabel(e.target.value)}
+            value={elementLabel}
+            onChange={(e) => setElementLabel(e.target.value)}
           />
         </div>
         <button
