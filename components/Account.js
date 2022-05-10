@@ -7,6 +7,7 @@ export const Account = ({ session }) => {
   const [userID, setUserID] = useState("");
   const [elements, setElements] = useState([]);
   // const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
@@ -19,53 +20,43 @@ export const Account = ({ session }) => {
     try {
       let { data, error, status } = await supabase
         .from("grab_db")
-        .select("id,element")
+        .select("id,element,updated_at")
         .eq("userID", user.id);
       if (error && status !== 406) {
         throw error;
       }
       if (data) {
         setElements(data);
+        setLastUpdate(data[0].updated_at);
       }
     } catch (error) {
       console.log(error);
     }
   };
 
+  const UpdateTimeInDB = async (newTime) => {
+    const { data, error } = await supabase
+      .from("grab_db")
+      .update({ updated_at: newTime })
+      .match({ userID: userID });
+  };
+
   const addElementInDB = async (newElement) => {
+    let newUpdateTime = new Date().toLocaleString();
     try {
       const { data, error } = await supabase.from("grab_db").insert({
         userID: userID,
         element: newElement,
-        updated_at: new Date().toISOString().toLocaleString("en-US"),
+        updated_at: newUpdateTime,
       });
+      UpdateTimeInDB(newUpdateTime);
+      console.log(newUpdateTime);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLastUpdate(newUpdateTime);
     }
   };
-
-  // const updateProfile = async (newData) => {
-  //   try {
-  //     const user = supabase.auth.user();
-
-  //     const updates = {
-  //       id: user.id,
-  //       element: newData,
-  //       updated_at: new Date().toISOString().toLocaleString("en-US"),
-  //     };
-
-  //     let { error } = await supabase.from("grab_db").upsert(updates, {
-  //       returning: "minimal", // Don't return the value after inserting
-  //     });
-
-  //     if (error) {
-  //       throw error;
-  //     }
-  //   } catch (error) {
-  //     alert(error.message);
-  //   } finally {
-  //   }
-  // };
 
   const handleFormOpen = () => {
     setIsFormOpen(true);
@@ -87,7 +78,8 @@ export const Account = ({ session }) => {
     setElements((prevState) => [...temp]);
   };
 
-  const invokeCloudFunction = async (data) => {
+  const invokeCloudFunction = async (data, updateTime) => {
+    data.updated_at = updateTime;
     const options = {
       method: "POST",
       body: JSON.stringify(data),
@@ -105,30 +97,24 @@ export const Account = ({ session }) => {
   };
 
   const handleRefresh = () => {
-    let temp = elements;
-    temp.forEach((element) => {
-      element.element.data = "loading";
-    });
-    let update_time = new Date().toISOString().toLocaleString("en-US");
-    setElements((prev) => [...temp]);
+    let currentTime = new Date().toLocaleString();
+    const difference =
+      new Date(currentTime).getTime() - new Date(lastUpdate).getTime();
+    if (difference > 180000) {
+      let temp = elements;
+      temp.forEach((element) => {
+        element.element.data = "loading";
+      });
+      let updateTime = new Date().toLocaleString();
 
-    for (let i = 0; i < elements.length; i++) {
-      invokeCloudFunction(elements[i]);
-      console.log(elements[i]);
+      for (let i = 0; i < elements.length; i++) {
+        invokeCloudFunction(elements[i], updateTime);
+      }
+      setElements((prev) => [...temp]);
+      setLastUpdate((prevState) => updateTime);
+    } else {
+      alert("Not enough time has passed");
     }
-    // for (let i = 0; i < temp.length; i++) {
-    //   let tempObj = {
-    //     id: userID,
-    //     element: temp[i],
-    //     allElements: temp,
-    //     updated_at: update_time,
-    //   };
-    //   invokeCloudFunction(tempObj);
-    //   //   // let temp = elements;
-    //   //   // temp[i].data = data;
-    //   //   // setElements(temp);
-    //   // }
-    // }
   };
 
   return (
