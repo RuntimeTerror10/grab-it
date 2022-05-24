@@ -1,7 +1,14 @@
 import { useAuth } from "../context/authContext";
+import { useEffect } from "react";
+import { updateCookie } from "../utils/updateCookie";
 
 export const Header = ({ session }) => {
   const auth = useAuth();
+
+  useEffect(() => {
+    updateCookie();
+  }, []);
+
   return (
     <div className="bg-slate-800 text-slate-100 py-8">
       <div className=" text-center  text-3xl">Grab App</div>

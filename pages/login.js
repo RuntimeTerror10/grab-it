@@ -1,17 +1,21 @@
-import { useAuth } from "../context/authContext";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Router from "next/router";
-import { Header } from "../components/Header";
+import { updateCookie } from "../utils/updateCookie";
+import { supabase } from "../utils/supabaseClient";
+import { useAuth } from "../context/authContext";
 import { Auth } from "../components/Auth";
+import { Header } from "../components/Header";
 
-export default function Login() {
+export default function Login({ user }) {
   const auth = useAuth();
 
   useEffect(() => {
     if (auth.session) {
       Router.push("/dashboard");
     }
+    updateCookie();
   });
+
   return (
     <>
       <div>
@@ -24,4 +28,18 @@ export default function Login() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps({ req }) {
+  const { user } = await supabase.auth.api.getUserByCookie(req);
+  if (user) {
+    return {
+      redirect: {
+        destination: "/dashboard",
+        permanent: false,
+      },
+    };
+  }
+
+  return { props: { user } };
 }

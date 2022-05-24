@@ -1,10 +1,16 @@
-import styles from "../styles/Home.module.css";
+import { useEffect } from "react";
 import { useAuth } from "../context/authContext";
+import { updateCookie } from "../utils/updateCookie";
 import Link from "next/link";
 import { Header } from "../components/Header";
 
 export default function Home() {
   const auth = useAuth();
+
+  useEffect(() => {
+    updateCookie();
+  }, []);
+
   return (
     <div>
       <Header session={auth.session} />
@@ -27,34 +33,3 @@ export default function Home() {
     </div>
   );
 }
-
-// import { useState, useEffect } from "react";
-// import { supabase } from "../utils/supabaseClient";
-// import { Header } from "../components/Header";
-// import { Auth } from "../components/Auth";
-// import { Account } from "../components/Account";
-
-// export default function Home() {
-//   const [session, setSession] = useState(null);
-
-//   useEffect(() => {
-//     setSession(supabase.auth.session());
-
-//     supabase.auth.onAuthStateChange((_event, session) => {
-//       setSession(session);
-//     });
-//   }, []);
-
-//   return (
-//     <div>
-//       <Header session={session} />
-//       <div className="container" style={{ padding: "50px 0 100px 0" }}>
-//         {!session ? (
-//           <Auth />
-//         ) : (
-//           <Account key={session.user.id} session={session} />
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
