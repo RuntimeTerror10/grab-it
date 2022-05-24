@@ -1,7 +1,12 @@
-import '../styles/globals.css'
+import "../styles/globals.css";
+import { AuthWrapper } from "../context/authContext";
 
 function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+  return (
+    <AuthWrapper>
+      <Component {...pageProps} />
+    </AuthWrapper>
+  );
 }
 
-export default MyApp
+export default MyApp;
