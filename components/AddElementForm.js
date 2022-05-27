@@ -8,7 +8,7 @@ export const AddElementForm = (props) => {
     e.preventDefault();
     let elementJSON = JSON.parse(grabbedElement);
     elementJSON.label = elementLabel;
-    props.closeForm(elementJSON);
+    props.formSubmit(elementJSON);
   };
 
   return (
@@ -52,6 +52,12 @@ export const AddElementForm = (props) => {
           className="text-slate-100 rounded border-solid border-2 border-slate-100 p-3"
         >
           + Add Item
+        </button>
+        <button
+          onClick={props.formClose}
+          className="bg-slate-100 text-slate-800 rounded border-solid border-2 border-slate-100 p-3"
+        >
+          Cancel
         </button>
       </form>
     </>
