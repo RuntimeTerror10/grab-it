@@ -2,8 +2,6 @@ import { useState, useEffect, useContext, createContext } from "react";
 import { supabase } from "../utils/supabaseClient";
 import Router from "next/router";
 
-// import { supabase } from "../utils/supabaseClient.js";
-
 export const AuthContext = createContext();
 
 export function AuthWrapper({ children }) {
@@ -30,14 +28,13 @@ export function AuthWrapper({ children }) {
   const sharedState = {
     session: session,
     user: user,
-    msg: "hello",
     signIn: () => {
       supabase.auth.signIn(
         {
           provider: "google",
         },
         {
-          redirectTo: "https://grab-it-snowy.vercel.app/dashboard",
+          redirectTo: "http://localhost:3000/dashboard",
         }
       );
     },

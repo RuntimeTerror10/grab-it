@@ -1,12 +1,12 @@
 import { useAuth } from "../context/authContext";
 import { useEffect } from "react";
-import { updateCookie } from "../utils/updateCookie";
+import { listenToAuthChange } from "../utils/authStateChange";
 
 export const Header = ({ session }) => {
   const auth = useAuth();
 
   useEffect(() => {
-    updateCookie();
+    listenToAuthChange();
   }, []);
 
   return (

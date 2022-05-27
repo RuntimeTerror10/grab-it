@@ -1,15 +1,10 @@
 import { useEffect } from "react";
 import { useAuth } from "../context/authContext";
-import { updateCookie } from "../utils/updateCookie";
 import Link from "next/link";
 import { Header } from "../components/Header";
 
 export default function Home() {
   const auth = useAuth();
-
-  useEffect(() => {
-    updateCookie();
-  }, []);
 
   return (
     <div>

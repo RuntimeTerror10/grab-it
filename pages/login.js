@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import Router from "next/router";
-import { updateCookie } from "../utils/updateCookie";
+import { listenToAuthChange } from "../utils/authStateChange";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/authContext";
 import { Auth } from "../components/Auth";
@@ -13,7 +13,7 @@ export default function Login({ user }) {
     if (auth.session) {
       Router.push("/dashboard");
     }
-    updateCookie();
+    listenToAuthChange();
   });
 
   return (
