@@ -15,7 +15,7 @@ export default function Dashboard({ user }) {
     try {
       let { data, error, status } = await supabase
         .from("grab_db")
-        .select("id,element")
+        .select("id,element,updated_at")
         .eq("userID", user.id);
 
       if (error && status !== 406) {
@@ -34,16 +34,72 @@ export default function Dashboard({ user }) {
     }
   };
 
+  const UpdateTimeInDB = async (newTime) => {
+    const { data, error } = await supabase
+      .from("grab_db")
+      .update({ updated_at: newTime })
+      .match({ userID: user.id });
+  };
+
+  const updateOnDashboard = (data) => {
+    let temp = elements;
+    temp.forEach((ele) => {
+      if (ele.id === data.elementID) {
+        ele.element.data = data.newValue;
+        ele.status = "loaded";
+      }
+    });
+    setElements((prevState) => [...temp]);
+  };
+
+  const invokeCloudFunction = async (newElement) => {
+    const tempObj = { element: newElement, updateTime: new Date() };
+    const options = {
+      method: "POST",
+      body: JSON.stringify(tempObj),
+    };
+    fetch(
+      "http://localhost:5000/grab-app-production/us-central1/helloWorld",
+      options
+    )
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        updateOnDashboard(data);
+      });
+  };
+
+  const handleRefresh = () => {
+    let currentTime = new Date();
+    let lastUpdateTime = new Date(elements[0].updated_at);
+    let difference = currentTime - lastUpdateTime;
+
+    console.log(difference);
+
+    if (difference > 180000) {
+      let temp = elements;
+      temp.forEach((element) => {
+        element.status = "loading";
+      });
+      setElements((prevState) => [...temp]);
+      for (let i = 0; i < elements.length; i++) {
+        invokeCloudFunction(elements[i]);
+      }
+    } else {
+      console.log("fetch from DB");
+    }
+  };
+
   const addElementInDB = async (newElement) => {
-    let newUpdateTime = new Date().toLocaleString();
+    let newUpdateTime = new Date();
     try {
-      const { data, error } = await supabase.from("grab_db").insert({
+      const { error } = await supabase.from("grab_db").insert({
         userID: user.id,
         element: newElement,
         updated_at: newUpdateTime,
       });
-      // UpdateTimeInDB(newUpdateTime);
-      // console.log(newUpdateTime);
+      UpdateTimeInDB(newUpdateTime);
     } catch (error) {
       console.log(error);
     }
@@ -53,7 +109,6 @@ export default function Dashboard({ user }) {
     setIsFormOpen(false);
     await addElementInDB(newElement);
     getElements(user);
-    // setElements([...elements, newElement]);
   };
 
   const handleFormClose = () => {
@@ -63,6 +118,10 @@ export default function Dashboard({ user }) {
   useEffect(() => {
     setIsLoading(true);
     getElements(user);
+    // let i = 0;
+    // setInterval(() => {
+    //   console.log(++i);
+    // }, 2000);
   }, []);
 
   return (
@@ -77,7 +136,10 @@ export default function Dashboard({ user }) {
           <div className="w-full flex justify-end mt-10">
             {!isLoading && (
               <>
-                <button className="bg-slate-800 text-slate-100 p-3 rounded mr-3">
+                <button
+                  onClick={handleRefresh}
+                  className="bg-slate-800 text-slate-100 p-3 rounded mr-3"
+                >
                   Refresh
                 </button>
                 <button
