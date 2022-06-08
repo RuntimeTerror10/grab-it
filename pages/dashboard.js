@@ -8,8 +8,10 @@ export default function Dashboard({ user }) {
   const [elements, setElements] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   console.log(elements);
+  console.log(lastUpdated);
 
   const getElements = async (user) => {
     try {
@@ -26,6 +28,7 @@ export default function Dashboard({ user }) {
           element.status = "loaded";
         });
         setElements(data);
+        setLastUpdated(data[0].updated_at);
       }
     } catch (error) {
       console.log(error);
@@ -72,7 +75,7 @@ export default function Dashboard({ user }) {
 
   const handleRefresh = () => {
     let currentTime = new Date();
-    let lastUpdateTime = new Date(elements[0].updated_at);
+    let lastUpdateTime = new Date(lastUpdated);
     let difference = currentTime - lastUpdateTime;
 
     console.log(difference);
@@ -86,6 +89,7 @@ export default function Dashboard({ user }) {
       for (let i = 0; i < elements.length; i++) {
         invokeCloudFunction(elements[i]);
       }
+      setLastUpdated(currentTime);
     } else {
       console.log("fetch from DB");
     }
