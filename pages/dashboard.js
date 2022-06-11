@@ -122,10 +122,6 @@ export default function Dashboard({ user }) {
   useEffect(() => {
     setIsLoading(true);
     getElements(user);
-    // let i = 0;
-    // setInterval(() => {
-    //   console.log(++i);
-    // }, 2000);
   }, []);
 
   return (
