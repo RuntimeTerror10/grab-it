@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer");
 const cors = require("cors")({ origin: true });
 const { createClient } = require("@supabase/supabase-js");
 
-const supabase = createClient("supabaseUrl", "anonKey");
+const supabase = createClient("supabaseURL", "AnonKey");
 
 const ScrapeFromBrowser = async (userData) => {
   const browser = await puppeteer.launch();
