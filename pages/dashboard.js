@@ -62,7 +62,7 @@ export default function Dashboard({ user }) {
       body: JSON.stringify(tempObj),
     };
     fetch(
-      "http://localhost:5000/grab-app-production/us-central1/helloWorld",
+      "https://us-central1-grab-app-prod.cloudfunctions.net/helloWorld",
       options
     )
       .then((response) => {
