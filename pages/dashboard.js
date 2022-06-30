@@ -6,6 +6,7 @@ import { AddElementForm } from "../components/AddElementForm";
 
 export default function Dashboard({ user }) {
   const [elements, setElements] = useState([]);
+  const [plan, setPlan] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -17,7 +18,7 @@ export default function Dashboard({ user }) {
     try {
       let { data, error, status } = await supabase
         .from("grab_db")
-        .select("id,element,updated_at")
+        .select("id,element,updated_at,plan")
         .eq("userID", user.id);
 
       if (error && status !== 406) {
@@ -29,6 +30,7 @@ export default function Dashboard({ user }) {
         });
         setElements(data);
         setLastUpdated(data[0].updated_at);
+        setPlan(data[0].plan);
       }
     } catch (error) {
       console.log(error);
@@ -133,6 +135,7 @@ export default function Dashboard({ user }) {
             Welcome to your Dashboard{" "}
             <strong>{user.user_metadata.full_name}</strong>!
           </h1>
+          <h2>Plan : {plan}</h2>
           <div className="w-full flex justify-end mt-10">
             {!isLoading && (
               <>
