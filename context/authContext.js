@@ -34,7 +34,7 @@ export function AuthWrapper({ children }) {
           provider: "google",
         },
         {
-          redirectTo: "http://localhost:3000/dashboard",
+          redirectTo: "https://grab-it-snowy.vercel.app/dashboard",
         }
       );
     },
