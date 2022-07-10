@@ -63,10 +63,7 @@ export default function Dashboard({ user }) {
       method: "POST",
       body: JSON.stringify(tempObj),
     };
-    fetch(
-      "https://us-central1-grab-app-prod.cloudfunctions.net/helloWorld",
-      options
-    )
+    fetch("http://localhost:5000/grab-app-prod/us-central1/helloWorld", options)
       .then((response) => {
         return response.json();
       })
@@ -82,7 +79,7 @@ export default function Dashboard({ user }) {
 
     console.log(difference);
 
-    if (difference > 180000) {
+    if (difference > 30000) {
       let temp = elements;
       temp.forEach((element) => {
         element.status = "loading";

@@ -34,7 +34,7 @@ exports.helloWorld = functions.https.onRequest((request, response) => {
       let currentTime = new Date();
       let timeDifference = currentTime - new Date(temp.element.updated_at);
 
-      if (timeDifference > 180000) {
+      if (timeDifference > 30000) {
         temp.element.updated_at = temp.updateTime;
         const updatedValue = await ScrapeFromBrowser(temp.element);
         updateItem(updatedValue, temp.element);
